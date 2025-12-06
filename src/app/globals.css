@@ -153,4 +153,26 @@
     animation: fadeIn 0.6s ease-out 0.4s forwards;
     opacity: 0;
   }
+
+  /* Scroll-triggered animations */
+  .animate-on-scroll {
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .animate-on-scroll.visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  .animate-on-scroll.delay-100 {
+    transition-delay: 100ms;
+  }
+
+  .animate-on-scroll.delay-200 {
+    transition-delay: 200ms;
+  }
+
+  .animate-on-scroll.delay-300 {
+    transition-delay: 300ms;
+  }
 }

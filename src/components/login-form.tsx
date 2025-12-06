@@ -38,7 +38,8 @@ export function LoginForm({
       if (error) throw error;
       window.location.href = "/protected/profile";
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      // Use generic error message for security - don't reveal if email exists
+      setError("Invalid email or password");
     } finally {
       setIsLoading(false);
     }

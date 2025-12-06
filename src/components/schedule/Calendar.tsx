@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import type { YogaClass } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -26,6 +26,7 @@ type OldYogaClass = {
 type CalendarProps = {
   upcomingClasses: OldYogaClass[];
   allClasses: OldYogaClass[];
+  initialClassId?: number;
 };
 
 const monthNames = [
@@ -41,16 +42,28 @@ function transformClasses(classes: OldYogaClass[]): YogaClass[] {
     const startDate = new Date(c.startTime);
     const endDate = new Date(c.endTime);
 
-    // Format date in local timezone consistently
-    const year = startDate.getFullYear();
-    const month = String(startDate.getMonth() + 1).padStart(2, '0');
-    const day = String(startDate.getDate()).padStart(2, '0');
+    // Convert to Kansas timezone (America/Chicago - Central Time)
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    const parts = formatter.formatToParts(startDate);
+    const year = parts.find(p => p.type === 'year')?.value || '';
+    const month = parts.find(p => p.type === 'month')?.value || '';
+    const day = parts.find(p => p.type === 'day')?.value || '';
+    const startHours = parts.find(p => p.type === 'hour')?.value || '';
+    const startMinutes = parts.find(p => p.type === 'minute')?.value || '';
     const localDate = `${year}-${month}-${day}`;
 
-    const startHours = String(startDate.getHours()).padStart(2, '0');
-    const startMinutes = String(startDate.getMinutes()).padStart(2, '0');
-    const endHours = String(endDate.getHours()).padStart(2, '0');
-    const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
+    const endParts = formatter.formatToParts(endDate);
+    const endHours = endParts.find(p => p.type === 'hour')?.value || '';
+    const endMinutes = endParts.find(p => p.type === 'minute')?.value || '';
 
     return {
       id: c.id,
@@ -70,19 +83,35 @@ function transformClasses(classes: OldYogaClass[]): YogaClass[] {
   });
 }
 
-export default function Calendar({ allClasses }: CalendarProps) {
-  const classes = transformClasses(allClasses)
+export default function Calendar({ allClasses, initialClassId }: CalendarProps) {
+  const classes = useMemo(() => transformClasses(allClasses), [allClasses])
   const canViewPast = true
   const isAdmin = false
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedClass, setSelectedClass] = useState<YogaClass | null>(null)
   const [showDialog, setShowDialog] = useState(false)
-  const [viewMode, setViewMode] = useState<"month" | "week">("month")
+  const [viewMode, setViewMode] = useState<"month" | "week">("week")
   const [registrationData, setRegistrationData] = useState<{
     isRegistered: boolean
     isAuthenticated: boolean
   } | null>(null)
+  const hasOpenedInitialClassRef = useRef(false)
+
+  // Open dialog for initial class if provided via URL
+  useEffect(() => {
+    if (initialClassId && !hasOpenedInitialClassRef.current && classes.length > 0) {
+      const classToOpen = classes.find(c => c.id === initialClassId)
+      if (classToOpen) {
+        hasOpenedInitialClassRef.current = true
+        setSelectedClass(classToOpen)
+        checkUserRegistration(classToOpen.id).then(regData => {
+          setRegistrationData(regData)
+          setShowDialog(true)
+        })
+      }
+    }
+  }, [initialClassId, classes])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -153,56 +182,65 @@ export default function Calendar({ allClasses }: CalendarProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">{getDisplayTitle()}</h2>
-        <div className="flex gap-2">
-          <div className="flex border rounded-md overflow-hidden">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-[#644874] to-[#6B92B5] bg-clip-text text-transparent">{getDisplayTitle()}</h2>
+        <div className="flex gap-3">
+          {/* Month/Week toggle - hidden for now but keeping component */}
+          {false && (
+            <div className="flex backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border border-[#644874]/20 dark:border-[#644874]/30 rounded-xl overflow-hidden shadow-sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCurrentDate(new Date())
+                  setViewMode("month")
+                }}
+                className={`!rounded-none h-full px-4 transition-all duration-300 ${
+                  viewMode === "month"
+                    ? "bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white hover:from-[#553965] hover:to-[#5A7FA0]"
+                    : "text-gray-600 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20"
+                }`}
+              >
+                Month
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCurrentDate(new Date())
+                  setViewMode("week")
+                }}
+                className={`!rounded-none h-full px-4 transition-all duration-300 ${
+                  viewMode === "week"
+                    ? "bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white hover:from-[#553965] hover:to-[#5A7FA0]"
+                    : "text-gray-600 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20"
+                }`}
+              >
+                Week
+              </Button>
+            </div>
+          )}
+
+          <div className="flex gap-1">
             <Button
-              variant={viewMode === "month" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => {
-                setCurrentDate(new Date())
-                setViewMode("month")
-              }}
-              className={viewMode === "month"
-                ? "!rounded-none bg-purple-900 hover:bg-purple-900 h-full dark:bg-purple-700 dark:hover:bg-purple-700"
-                : "!rounded-none h-full"
-              }
+              variant="outline"
+              size="icon"
+              onClick={viewMode === "month" ? goToPreviousMonth : goToPreviousWeek}
+              disabled={!canViewPast && (viewMode === "month" ? isPastMonth : isPastWeek)}
+              className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-[#644874]/20 dark:border-[#644874]/30 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:border-[#644874]/40 dark:hover:border-[#644874]/50 transition-all duration-300"
             >
-              Month
+              <ChevronLeft className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
             </Button>
             <Button
-              variant={viewMode === "week" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => {
-                setCurrentDate(new Date())
-                setViewMode("week")
-              }}
-              className={viewMode === "week"
-                ? "!rounded-none bg-purple-900 hover:bg-purple-900 h-full dark:bg-purple-700 dark:hover:bg-purple-700"
-                : "!rounded-none h-full"
-              }
+              variant="outline"
+              size="icon"
+              onClick={viewMode === "month" ? goToNextMonth : goToNextWeek}
+              className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-[#644874]/20 dark:border-[#644874]/30 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:border-[#644874]/40 dark:hover:border-[#644874]/50 transition-all duration-300"
             >
-              Week
+              <ChevronRight className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
             </Button>
           </div>
-
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={viewMode === "month" ? goToPreviousMonth : goToPreviousWeek}
-            disabled={!canViewPast && (viewMode === "month" ? isPastMonth : isPastWeek)}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={viewMode === "month" ? goToNextMonth : goToNextWeek}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 

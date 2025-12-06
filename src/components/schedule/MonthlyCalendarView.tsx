@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import type { YogaClass } from "@/lib/types"
-import { Card } from "@/components/ui/card"
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { formatTime } from "@/lib/utils"
 
@@ -69,10 +68,10 @@ export function MonthlyCalendarView({
   }
 
   return (
-    <Card className="p-4">
-      <div className="grid grid-cols-7 gap-2">
+    <div className="backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 border border-[#644874]/15 dark:border-[#644874]/25 rounded-2xl shadow-lg p-5">
+      <div className="grid grid-cols-7 gap-3">
         {dayNames.map((day) => (
-          <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+          <div key={day} className="text-center text-sm font-semibold text-[#644874]/70 dark:text-[#9d7fb0]/70 py-2">
             {day}
           </div>
         ))}
@@ -125,47 +124,29 @@ export function MonthlyCalendarView({
             <div
               key={index}
               className={`
-                min-h-[120px] p-2 rounded-lg text-sm transition-colors border
-                ${!isInCurrentPeriod ? "text-muted-foreground opacity-40 bg-muted/20" : "bg-background"}
-                ${isToday ? "border-2 border-purple-900 dark:border-purple-700" : "border-border"}
+                min-h-[120px] p-2.5 rounded-xl text-sm transition-all duration-300
+                ${!isInCurrentPeriod
+                  ? "text-muted-foreground opacity-40 bg-gray-100/30 dark:bg-gray-800/20"
+                  : "bg-white/50 dark:bg-gray-800/30 border border-[#644874]/10 dark:border-[#644874]/20"
+                }
+                ${isToday
+                  ? "ring-2 ring-[#644874]/50 dark:ring-[#644874]/60 bg-[#644874]/5 dark:bg-[#644874]/15"
+                  : ""
+                }
               `}
             >
               <div className="flex flex-col h-full">
-                <div className={`text-center mb-1 ${isToday ? "font-bold" : ""}`}>
+                <div className={`text-center mb-2 ${isToday ? "font-bold text-[#644874] dark:text-[#9d7fb0]" : "text-gray-700 dark:text-gray-300"}`}>
                   {day.getDate()}
                 </div>
 
                 {hasClasses && (
                   <div className="flex flex-col gap-1 flex-1">
-                    {/* Show past classes if toggled on (for current day with upcoming classes only) */}
-                    {isTodayWithUpcoming && showPast && pastClassesForToday.map((yogaClass) => {
-                      const isPast = isClassInPast(yogaClass)
-
-                      return (
-                        <button
-                          key={yogaClass.id}
-                          onClick={(e) => onClassClick(yogaClass, e)}
-                          className={`
-                            text-xs px-2 py-1 rounded text-left transition-colors truncate cursor-pointer
-                            ${yogaClass.isCancelled
-                              ? "bg-red-100 text-red-800 hover:bg-red-200 line-through dark:bg-red-900 dark:text-red-200"
-                              : isPast
-                              ? "bg-gray-300 text-gray-600 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-300"
-                              : "bg-purple-900 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600"
-                            }
-                          `}
-                        >
-                          <div className="font-medium truncate">{formatTime(yogaClass.startTime)}</div>
-                          <div className="truncate text-[10px] opacity-80">{yogaClass.className}</div>
-                        </button>
-                      )
-                    })}
-
                     {/* Show past classes toggle button for current day with upcoming classes only */}
                     {isTodayWithUpcoming && pastClassesForToday.length > 0 && (
                       <button
                         onClick={(e) => togglePastClasses(dateString, e)}
-                        className="text-xs text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1 cursor-pointer"
+                        className="text-xs text-gray-500 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] flex items-center justify-center gap-1 py-1 cursor-pointer transition-colors"
                       >
                         {showPast ? (
                           <>
@@ -181,6 +162,30 @@ export function MonthlyCalendarView({
                       </button>
                     )}
 
+                    {/* Show past classes if toggled on (for current day with upcoming classes only) */}
+                    {isTodayWithUpcoming && showPast && pastClassesForToday.map((yogaClass) => {
+                      const isPast = isClassInPast(yogaClass)
+
+                      return (
+                        <button
+                          key={yogaClass.id}
+                          onClick={(e) => onClassClick(yogaClass, e)}
+                          className={`
+                            text-xs px-2.5 py-1.5 rounded-lg text-left transition-all duration-300 truncate cursor-pointer
+                            ${yogaClass.isCancelled
+                              ? "bg-red-50 text-red-600 hover:bg-red-100 line-through dark:bg-red-900/30 dark:text-red-400 border border-red-200/50 dark:border-red-800/30"
+                              : isPast
+                              ? "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-700/40 dark:text-gray-400 border border-gray-200/50 dark:border-gray-600/30"
+                              : "bg-[#644874] text-white hover:bg-[#553965] dark:bg-[#644874] dark:hover:bg-[#553965] shadow-sm"
+                            }
+                          `}
+                        >
+                          <div className="font-medium truncate">{formatTime(yogaClass.startTime)}</div>
+                          <div className="truncate text-[10px] opacity-80">{yogaClass.className}</div>
+                        </button>
+                      )
+                    })}
+
                     {/* Show upcoming classes or all classes for non-today days */}
                     {(isTodayWithUpcoming ? upcomingClassesToShow : displayClasses).map((yogaClass) => {
                       const isPast = isClassInPast(yogaClass)
@@ -190,12 +195,12 @@ export function MonthlyCalendarView({
                           key={yogaClass.id}
                           onClick={(e) => onClassClick(yogaClass, e)}
                           className={`
-                            text-xs px-2 py-1 rounded text-left transition-colors truncate cursor-pointer
+                            text-xs px-2.5 py-1.5 rounded-lg text-left transition-all duration-300 truncate cursor-pointer
                             ${yogaClass.isCancelled
-                              ? "bg-red-100 text-red-800 hover:bg-red-200 line-through dark:bg-red-900 dark:text-red-200"
+                              ? "bg-red-50 text-red-600 hover:bg-red-100 line-through dark:bg-red-900/30 dark:text-red-400 border border-red-200/50 dark:border-red-800/30"
                               : isPast
-                              ? "bg-gray-300 text-gray-600 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-300"
-                              : "bg-purple-900 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600"
+                              ? "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-700/40 dark:text-gray-400 border border-gray-200/50 dark:border-gray-600/30"
+                              : "bg-[#644874] text-white hover:bg-[#553965] dark:bg-[#644874] dark:hover:bg-[#553965] shadow-sm"
                             }
                           `}
                         >
@@ -208,7 +213,7 @@ export function MonthlyCalendarView({
                     {hasMore && (
                       <button
                         onClick={(e) => toggleDayExpansion(dateString, e)}
-                        className="text-xs text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1 cursor-pointer"
+                        className="text-xs text-[#644874] dark:text-[#9d7fb0] hover:text-[#553965] dark:hover:text-[#b99cc9] flex items-center justify-center gap-1 py-1 cursor-pointer transition-colors"
                       >
                         {isExpanded ? (
                           <>
@@ -230,6 +235,6 @@ export function MonthlyCalendarView({
           )
         })}
       </div>
-    </Card>
+    </div>
   )
 }

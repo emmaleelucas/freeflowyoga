@@ -13,10 +13,10 @@ export async function AuthButton() {
   if (!userId) {
     return (
       <div className="flex gap-2">
-        <Button asChild size="sm" variant={"outline"} className="border-purple-300 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300 transition-all">
+        <Button asChild size="sm" variant={"outline"} className="border-[#644874]/30 dark:border-[#644874]/40 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:text-[#644874] dark:hover:text-[#9d7fb0] transition-all">
           <Link href="/auth/login">Sign in</Link>
         </Button>
-        <Button asChild size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all">
+        <Button asChild size="sm" className="bg-gradient-to-r from-[#644874] to-[#6B92B5] hover:from-[#553965] hover:to-[#5A7FA0] text-white shadow-md hover:shadow-lg transition-all">
           <Link href="/auth/sign-up">Sign up</Link>
         </Button>
       </div>
@@ -31,11 +31,14 @@ export async function AuthButton() {
     .single();
 
   if (!userData) {
-    // Fallback if user profile doesn't exist yet
+    // If user is authenticated but has no profile, show sign in/sign up
     return (
       <div className="flex gap-2">
-        <Button asChild size="sm" variant={"outline"}>
-          <Link href="/profile">Complete Profile</Link>
+        <Button asChild size="sm" variant={"outline"} className="border-[#644874]/30 dark:border-[#644874]/40 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:text-[#644874] dark:hover:text-[#9d7fb0] transition-all">
+          <Link href="/auth/login">Sign in</Link>
+        </Button>
+        <Button asChild size="sm" className="bg-gradient-to-r from-[#644874] to-[#6B92B5] hover:from-[#553965] hover:to-[#5A7FA0] text-white shadow-md hover:shadow-lg transition-all">
+          <Link href="/auth/sign-up">Sign up</Link>
         </Button>
       </div>
     );

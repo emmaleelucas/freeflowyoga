@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 import { ClassesTabs } from "./classes-tabs";
+import { DeleteAccountButton } from "./delete-account-button";
 import { Banana } from "lucide-react";
 import { getUserUpcomingClasses, getUserPastClasses } from "@/lib/actions";
 
@@ -48,14 +49,14 @@ async function ProfileContent() {
       <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-8 w-full max-w-7xl h-full px-5 pt-8">
         {/* Left Sidebar - User Info */}
         <div className="space-y-6 h-fit">
-          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-100 dark:border-purple-900 sticky top-8">
+          <Card className="bg-gradient-to-br from-[#644874]/10 via-[#644874]/5 to-[#6B92B5]/10 dark:from-[#644874]/30 dark:via-[#644874]/20 dark:to-[#6B92B5]/20 border-2 border-[#644874]/20 dark:border-[#644874]/40 sticky top-8">
             <CardHeader className="pb-0 space-y-3">
               <div className="flex lg:flex-col items-start lg:items-center gap-3 lg:gap-0">
-                <div className="w-8 h-8 lg:w-24 lg:h-24 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 lg:mx-auto lg:mb-4 flex items-center justify-center text-white text-sm lg:text-3xl font-bold flex-shrink-0">
+                <div className="w-8 h-8 lg:w-24 lg:h-24 rounded-full bg-gradient-to-r from-[#644874] to-[#6B92B5] lg:mx-auto lg:mb-4 flex items-center justify-center text-white text-sm lg:text-3xl font-bold flex-shrink-0">
                   {userData.first_name[0]}{userData.last_name[0]}
                 </div>
                 <div className="flex-1 lg:flex-none space-y-1 lg:space-y-0">
-                  <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent lg:text-center lg:mb-2">
+                  <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#644874] to-[#6B92B5] bg-clip-text text-transparent lg:text-center lg:mb-2">
                     {userData.first_name} {userData.last_name}
                   </h1>
                   <p className="text-sm text-muted-foreground lg:text-center lg:mb-4">{userData.kstate_email}</p>
@@ -75,20 +76,22 @@ async function ProfileContent() {
             </CardHeader>
 
             <CardContent className="pt-6">
-              <div className="space-y-3 border-t border-purple-200 dark:border-purple-800 pt-6 mx-3">
+              <div className="space-y-3 border-t border-[#644874]/20 dark:border-[#644874]/30 pt-6 mx-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Upcoming Classes</span>
-                  <span className="font-semibold text-purple-600 dark:text-purple-400">{upcomingClasses.length}</span>
+                  <span className="font-semibold text-[#644874] dark:text-[#9d7fb0]">{upcomingClasses.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Classes Attended</span>
-                  <span className="font-semibold text-purple-600 dark:text-purple-400">
+                  <span className="font-semibold text-[#644874] dark:text-[#9d7fb0]">
                     {pastClasses.filter(c => c.attended).length}
                   </span>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          <DeleteAccountButton />
         </div>
 
         {/* Right Content - Classes */}

@@ -126,23 +126,23 @@ export function ClassDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-xl font-bold bg-gradient-to-r from-[#644874] to-[#6B92B5] bg-clip-text text-transparent">
             {yogaClass.className}
           </DialogTitle>
           <DialogDescription className="text-sm text-foreground font-bold flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-purple-900 dark:text-purple-400" />
+            <CalendarClock className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
             {formatDateTime(yogaClass.date, yogaClass.startTime, yogaClass.endTime)}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-foreground">
-            <User className="h-4 w-4 text-purple-900 dark:text-purple-400" />
+            <User className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
             <span>{yogaClass.instructorName}</span>
           </div>
 
           <div className="flex items-start gap-2 text-sm text-foreground">
-            <MapPin className="h-4 w-4 mt-0.5 text-purple-900 dark:text-purple-400" />
+            <MapPin className="h-4 w-4 mt-0.5 text-[#644874] dark:text-[#9d7fb0]" />
             <div className="flex flex-col">
               <span>
                 {yogaClass.location?.building || 'TBA'}, {yogaClass.location?.room || 'TBA'}
@@ -152,7 +152,7 @@ export function ClassDetailsDialog({
                   href={googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-purple-700 hover:text-purple-900 hover:underline text-xs dark:text-purple-400 dark:hover:text-purple-300"
+                  className="text-[#644874] hover:text-[#553965] hover:underline text-xs dark:text-[#9d7fb0] dark:hover:text-[#b99cc9]"
                 >
                   View on Google Maps
                 </a>
@@ -161,20 +161,20 @@ export function ClassDetailsDialog({
           </div>
 
           <div className="flex items-start gap-2 text-sm text-foreground">
-            <AlignLeft className="h-4 w-4 mt-0.5 flex-shrink-0 text-purple-900 dark:text-purple-400" />
+            <AlignLeft className="h-4 w-4 mt-0.5 flex-shrink-0 text-[#644874] dark:text-[#9d7fb0]" />
             <p>{yogaClass.classDescription}</p>
           </div>
 
           <Badge className={yogaClass.matsProvided
-            ? "bg-purple-700 text-white hover:bg-purple-700"
-            : "border-purple-700 text-purple-700 bg-transparent hover:bg-transparent hover:border-purple-700 hover:text-purple-700 dark:border-purple-400 dark:text-purple-400 dark:hover:bg-transparent dark:hover:border-purple-400 dark:hover:text-purple-400"
+            ? "bg-[#644874] text-white hover:bg-[#644874]"
+            : "border-[#644874] text-[#644874] bg-transparent hover:bg-transparent hover:border-[#644874] hover:text-[#644874] dark:border-[#9d7fb0] dark:text-[#9d7fb0] dark:hover:bg-transparent dark:hover:border-[#9d7fb0] dark:hover:text-[#9d7fb0]"
           }>
             {yogaClass.matsProvided ? "Mats Provided" : "Bring Your Own Mat"}
           </Badge>
 
           {yogaClass.isCancelled && (
-            <div className="bg-red-100 border border-red-300 rounded-lg p-3 mt-4 dark:bg-red-900/20 dark:border-red-800">
-              <p className="text-sm font-medium text-red-800 dark:text-red-200">
+            <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 mt-4 dark:bg-rose-900/15 dark:border-rose-800/50">
+              <p className="text-sm font-medium text-rose-700 dark:text-rose-300">
                 This class has been cancelled
               </p>
             </div>
@@ -183,18 +183,26 @@ export function ClassDetailsDialog({
           {/* Registration Section */}
           {!yogaClass.isCancelled && isAuthenticated && (
             <div className="mt-6 pt-6 border-t">
-              {justRegistered ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 dark:bg-green-900/20 dark:border-green-800">
-                  <div className="flex items-center gap-2 text-green-800 dark:text-green-200 mb-3">
+              {isClassStarted && isRegistered ? (
+                // Past class that user attended
+                <div className="bg-[#6B92B5]/10 border border-[#6B92B5]/20 rounded-lg p-4 dark:bg-[#6B92B5]/15 dark:border-[#6B92B5]/30">
+                  <div className="flex items-center gap-2 text-[#6B92B5] dark:text-[#9dbdd6]">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <p className="font-semibold">You attended this class</p>
+                  </div>
+                </div>
+              ) : justRegistered ? (
+                <div className="bg-[#6B92B5]/10 border border-[#6B92B5]/20 rounded-lg p-4 dark:bg-[#6B92B5]/15 dark:border-[#6B92B5]/30">
+                  <div className="flex items-center gap-2 text-[#6B92B5] dark:text-[#9dbdd6] mb-3">
                     <CheckCircle2 className="h-5 w-5" />
                     <p className="font-semibold">Successfully registered!</p>
                   </div>
-                  <p className="text-sm text-green-700 dark:text-green-300 mb-4">
+                  <p className="text-sm text-[#6B92B5] dark:text-[#9dbdd6] mb-4">
                     You're all set for this class. We'll see you there!
                   </p>
                   <div className="space-y-2">
                     <Link href="/protected/profile">
-                      <Button className="w-full bg-purple-900 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600">
+                      <Button className="w-full bg-[#644874] hover:bg-[#553965] dark:bg-[#644874] dark:hover:bg-[#553965]">
                         View My Schedule
                       </Button>
                     </Link>
@@ -202,7 +210,7 @@ export function ClassDetailsDialog({
                       onClick={handleUnregister}
                       disabled={isLoading}
                       variant="ghost"
-                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                      className="w-full text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:text-rose-300 dark:hover:bg-rose-900/15"
                     >
                       <X className="h-4 w-4 mr-2" />
                       {isLoading ? "Canceling..." : "Cancel Registration"}
@@ -210,8 +218,8 @@ export function ClassDetailsDialog({
                   </div>
                 </div>
               ) : isRegistered ? (
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 dark:bg-purple-900/20 dark:border-purple-800">
-                  <div className="flex items-center gap-2 text-purple-800 dark:text-purple-200 mb-3">
+                <div className="bg-[#644874]/10 border border-[#644874]/20 rounded-lg p-4 dark:bg-[#644874]/15 dark:border-[#644874]/30">
+                  <div className="flex items-center gap-2 text-[#644874] dark:text-[#9d7fb0] mb-3">
                     <CheckCircle2 className="h-5 w-5" />
                     <p className="font-semibold">You're registered for this class</p>
                   </div>
@@ -225,7 +233,7 @@ export function ClassDetailsDialog({
                       onClick={handleUnregister}
                       disabled={isLoading}
                       variant="ghost"
-                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                      className="w-full text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:text-rose-300 dark:hover:bg-rose-900/15"
                     >
                       <X className="h-4 w-4 mr-2" />
                       {isLoading ? "Canceling..." : "Cancel Registration"}
@@ -243,14 +251,14 @@ export function ClassDetailsDialog({
                   ) : (
                     <>
                       {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 dark:bg-red-900/20 dark:border-red-800">
-                          <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                        <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 mb-4 dark:bg-rose-900/15 dark:border-rose-800/50">
+                          <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
                         </div>
                       )}
                       <Button
                         onClick={handleRegister}
                         disabled={isLoading}
-                        className="w-full bg-purple-900 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600"
+                        className="w-full bg-[#644874] hover:bg-[#553965] dark:bg-[#644874] dark:hover:bg-[#553965]"
                       >
                         {isLoading ? "Registering..." : "Sign Up for Class"}
                       </Button>

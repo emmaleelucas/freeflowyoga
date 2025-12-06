@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { buildingsTable, roomsTable, yogaClassesTable } from './db/schema';
+import { buildingsTable, roomsTable, yogaClassesTable, classSeriesTable } from './db/schema';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -253,29 +253,79 @@ async function seed() {
       }
     ];
 
-    // Generate all class instances
-    const allClasses = [];
+    // Group templates into series (by className + startTime)
+    const seriesMap = new Map<string, typeof classTemplates>();
+
     for (const template of classTemplates) {
-      const dates = generateClassDates(template.day, template.startTime, template.endTime);
-      
-      for (const date of dates) {
-        allClasses.push({
-          className: template.className,
-          startTime: date.startTime,
-          endTime: date.endTime,
-          matsProvided: template.matsProvided,
-          classDescription: template.description,
-          isCancelled: false,
-          instructorName: template.instructor,
-          roomId: locationToRoomId[template.location]
-        });
+      const seriesKey = `${template.className}|${template.startTime}`;
+      if (!seriesMap.has(seriesKey)) {
+        seriesMap.set(seriesKey, []);
+      }
+      seriesMap.get(seriesKey)!.push(template);
+    }
+
+    console.log(`Detected ${seriesMap.size} unique series`);
+
+    // Create series and their instances
+    const allClasses = [];
+
+    for (const [_seriesKey, templates] of seriesMap) {
+      const firstTemplate = templates[0];
+      const recurrenceDays = templates.map(t => t.day).sort((a, b) => a - b);
+
+      // Determine defaults based on consistency across templates
+      const allSameInstructor = templates.every(t => t.instructor === firstTemplate.instructor);
+      const allSameLocation = templates.every(t => t.location === firstTemplate.location);
+      const allSameMats = templates.every(t => t.matsProvided === firstTemplate.matsProvided);
+
+      // Format time for series (convert "6:15 AM" to "06:15")
+      const formatTimeForSeries = (timeStr: string): string => {
+        const [hours, minutes] = parseTime(timeStr);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      };
+
+      // Create series entry
+      const [series] = await db.insert(classSeriesTable).values({
+        seriesName: firstTemplate.className,
+        seriesDescription: firstTemplate.description,
+        recurrencePattern: 'weekly',
+        recurrenceDays: recurrenceDays,
+        startTime: formatTimeForSeries(firstTemplate.startTime),
+        endTime: formatTimeForSeries(firstTemplate.endTime),
+        defaultInstructorName: allSameInstructor ? firstTemplate.instructor : null,
+        defaultRoomId: allSameLocation ? locationToRoomId[firstTemplate.location] : null,
+        defaultMatsProvided: allSameMats ? firstTemplate.matsProvided : false,
+        seriesStartDate: startDate.toISOString().split('T')[0],
+        seriesEndDate: null, // Ongoing
+        isActive: true
+      }).returning();
+
+      console.log(`Created series: ${series.seriesName} (${recurrenceDays.length} day(s)/week)`);
+
+      // Generate instances for this series
+      for (const template of templates) {
+        const dates = generateClassDates(template.day, template.startTime, template.endTime);
+
+        for (const date of dates) {
+          allClasses.push({
+            seriesId: series.id,
+            className: template.className,
+            startTime: date.startTime,
+            endTime: date.endTime,
+            matsProvided: template.matsProvided,
+            classDescription: template.description,
+            isCancelled: false,
+            instructorName: template.instructor,
+            roomId: locationToRoomId[template.location]
+          });
+        }
       }
     }
 
-    // Insert all classes
+    // Insert all class instances
     const insertedClasses = await db.insert(yogaClassesTable).values(allClasses).returning();
-    
-    console.log(`Inserted ${insertedClasses.length} yoga classes (~5 months of data)`);
+
+    console.log(`Inserted ${insertedClasses.length} yoga class instances (~5 months of data)`);
     console.log('Seed completed successfully!');
 
   } catch (error) {
@@ -286,4 +336,4 @@ async function seed() {
   }
 }
 
-seed();
+//seed();

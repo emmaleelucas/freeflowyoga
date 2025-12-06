@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 
@@ -32,5 +33,24 @@ export async function createClient() {
         },
       },
     },
+  );
+}
+
+/**
+ * Creates a Supabase admin client with service role privileges.
+ * Use only for admin operations like deleting users.
+ */
+export function createAdminClient() {
+  noStore();
+
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
   );
 }

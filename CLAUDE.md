@@ -1,0 +1,1 @@
+- 644874 or #6B92B5 I am not sure I like the picked out, can you try something similar to these colors? try different shades of these colors as well but apply these colors to the whole app

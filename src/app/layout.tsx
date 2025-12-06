@@ -43,7 +43,7 @@ export default function RootLayout({
         >
           <Toaster position="top-center" />
 
-            <nav className="sticky top-0 z-50 w-full flex justify-center border-b border-purple-200/50 dark:border-purple-900/50 h-16 bg-background/80 backdrop-blur-md shadow-sm">
+            <nav className="sticky top-0 z-50 w-full flex justify-center border-b border-[#644874]/20 dark:border-[#644874]/30 h-16 bg-background/80 backdrop-blur-md shadow-sm">
               <div className="w-full max-w-7xl flex justify-between items-center p-3 px-5 text-sm">
                 <div className="flex gap-5 items-center">
                   <Link href={"/"} className="flex items-center gap-2 font-semibold group">
@@ -51,15 +51,21 @@ export default function RootLayout({
                       <Image src="/images/logo.png" alt="K-State Free Yoga Logo" width={32} height={32} className="dark:hidden transition-transform group-hover:scale-110" />
                       <Image src="/images/logo-dark.png" alt="K-State Free Yoga Logo" width={32} height={32} className="hidden dark:block transition-transform group-hover:scale-110" />
                     </div>
-                    <span className="hidden min-[500px]:inline bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <span className="hidden min-[500px]:inline bg-gradient-to-r from-[#644874] to-[#6B92B5] bg-clip-text text-transparent">
                       K-State Free Yoga
                     </span>
                   </Link>
                   <Link
                     href={"/schedule"}
-                    className="relative px-3 py-2 rounded-md font-medium transition-all duration-200 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300"
+                    className="relative px-3 py-2 rounded-md font-medium transition-all duration-200 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:text-[#644874] dark:hover:text-[#9d7fb0]"
                   >
                     Schedule
+                  </Link>
+                  <Link
+                    href={"/explore"}
+                    className="relative px-3 py-2 rounded-md font-medium transition-all duration-200 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:text-[#644874] dark:hover:text-[#9d7fb0]"
+                  >
+                    Explore
                   </Link>
                 </div>
                 {!hasEnvVars ? (
@@ -74,13 +80,13 @@ export default function RootLayout({
 
             {children}
 
-            <footer className="w-full flex items-center justify-center border-t border-purple-200/50 dark:border-purple-900/50 mx-auto text-center text-xs gap-8 py-16 bg-gradient-to-b from-background to-purple-50/30 dark:to-purple-950/10">
+            <footer className="w-full flex items-center justify-center border-t border-[#644874]/20 dark:border-[#644874]/30 mx-auto text-center text-xs gap-8 py-16 bg-gradient-to-b from-background to-[#644874]/5 dark:to-[#644874]/10">
               <p className="text-muted-foreground">
                 Powered by{" "}
                 <a
                   href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
                   target="_blank"
-                  className="font-bold hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="font-bold hover:text-[#644874] dark:hover:text-[#9d7fb0] transition-colors"
                   rel="noreferrer"
                 >
                   Supabase
