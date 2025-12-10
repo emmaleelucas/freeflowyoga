@@ -13,7 +13,7 @@ async function ExploreData() {
 
 export default function ExplorePage() {
   return (
-    <div className="min-h-screen bg-[#644874]/5 dark:bg-[#644874]/10">
+    <div className="min-h-screen bg-gradient-to-b from-[#644874]/5 to-background dark:from-[#644874]/10 dark:to-background">
       <div className="mx-auto px-4 py-8 max-w-7xl">
         <Suspense fallback={
           <div className="animate-pulse space-y-4">

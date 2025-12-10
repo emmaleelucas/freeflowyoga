@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 30 20% 99%;
+    --foreground: 260 10% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 260 10% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --popover-foreground: 260 10% 15%;
+    --primary: 275 30% 35%;
+    --primary-foreground: 30 10% 98%;
+    --secondary: 30 10% 96%;
+    --secondary-foreground: 260 10% 15%;
+    --muted: 30 10% 94%;
+    --muted-foreground: 260 5% 45%;
+    --accent: 30 10% 94%;
+    --accent-foreground: 260 10% 15%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 30 10% 90%;
+    --input: 30 10% 90%;
+    --ring: 275 30% 35%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -30,26 +30,27 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 265 14% 10%;
+    --foreground: 30 10% 96%;
+    --card: 265 14% 13%;
+    --card-foreground: 30 10% 96%;
+    --popover: 265 14% 13%;
+    --popover-foreground: 30 10% 96%;
+    --primary: 275 40% 80%;
+    --primary-foreground: 265 14% 10%;
+    --secondary: 265 14% 20%;
+    --secondary-foreground: 30 10% 96%;
+    --muted: 265 14% 20%;
+    --muted-foreground: 265 5% 65%;
+    --accent: 265 14% 20%;
+    --accent-foreground: 30 10% 96%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 265 14% 20%;
+    --input: 265 14% 20%;
+    --ring: 275 40% 80%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -62,78 +63,98 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  ::selection {
+    @apply bg-[#644874]/20 text-[#644874] dark:bg-[#644874]/40 dark:text-[#9d7fb0];
   }
 }
 
 @layer utilities {
-  /* Blob animation for background elements */
+
+  /* Blob animation for background elements - slow and subtle */
   @keyframes blob {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translate(0, 0) scale(1);
     }
-    33% {
-      transform: translate(30px, -50px) scale(1.1);
+
+    25% {
+      transform: translate(15px, -25px) scale(1.02);
     }
-    66% {
-      transform: translate(-20px, 20px) scale(0.9);
+
+    50% {
+      transform: translate(-10px, 15px) scale(0.98);
+    }
+
+    75% {
+      transform: translate(10px, 10px) scale(1.01);
     }
   }
 
   .animate-blob {
-    animation: blob 7s infinite;
+    animation: blob 20s ease-in-out infinite;
   }
 
   .animation-delay-2000 {
-    animation-delay: 2s;
+    animation-delay: 4s;
   }
 
   .animation-delay-4000 {
-    animation-delay: 4s;
+    animation-delay: 8s;
   }
 
   /* Float animation for icons */
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
-      transform: translateY(-10px);
+      transform: translateY(-6px);
     }
   }
 
   .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
   }
 
   .animation-delay-1000 {
     animation-delay: 1s;
   }
 
-  /* Gradient animation */
+  /* Gradient animation - gentle and slow */
   @keyframes gradient {
     0% {
       background-position: 0% 50%;
     }
+
     50% {
       background-position: 100% 50%;
     }
+
     100% {
       background-position: 0% 50%;
     }
   }
 
   .animate-gradient {
-    animation: gradient 3s ease infinite;
+    animation: gradient 8s ease-in-out infinite;
   }
 
-  /* Fade in animations */
+  /* Fade in animations - smooth and natural */
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(12px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -141,22 +162,23 @@
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   }
 
   .animate-fade-in-delay-200 {
-    animation: fadeIn 0.6s ease-out 0.2s forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.15s forwards;
     opacity: 0;
   }
 
   .animate-fade-in-delay-400 {
-    animation: fadeIn 0.6s ease-out 0.4s forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
     opacity: 0;
   }
 
-  /* Scroll-triggered animations */
+  /* Scroll-triggered animations - smooth easing */
   .animate-on-scroll {
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .animate-on-scroll.visible {
@@ -165,14 +187,14 @@
   }
 
   .animate-on-scroll.delay-100 {
-    transition-delay: 100ms;
+    transition-delay: 80ms;
   }
 
   .animate-on-scroll.delay-200 {
-    transition-delay: 200ms;
+    transition-delay: 160ms;
   }
 
   .animate-on-scroll.delay-300 {
-    transition-delay: 300ms;
+    transition-delay: 240ms;
   }
 }

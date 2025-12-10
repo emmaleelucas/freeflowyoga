@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { buildingsTable, roomsTable, yogaClassesTable, classSeriesTable } from './db/schema';
+import { buildingsTable, yogaClassesTable, classSeriesTable } from './db/schema';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -12,46 +12,46 @@ export const db = drizzle(pool);
 // Helper function to generate classes from 1 month ago to 4 months ahead
 function generateClassDates(dayOfWeek: number, startTime: string, endTime: string) {
   const classes = [];
-  
+
   // Start date: 1 month ago
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - 1);
   startDate.setHours(0, 0, 0, 0);
-  
+
   // End date: 4 months from now
   const endDate = new Date();
   endDate.setMonth(endDate.getMonth() + 4);
   endDate.setHours(23, 59, 59, 999);
-  
+
   // Find first occurrence of the day on or after start date
   const current = new Date(startDate);
   while (current.getDay() !== dayOfWeek) {
     current.setDate(current.getDate() + 1);
   }
-  
+
   // Generate classes until we pass the end date
   while (current <= endDate) {
     const classDate = new Date(current);
-    
+
     // Parse time and create start datetime
     const [startHour, startMinute] = parseTime(startTime);
     const startDateTime = new Date(classDate);
     startDateTime.setHours(startHour, startMinute, 0, 0);
-    
+
     // Parse time and create end datetime
     const [endHour, endMinute] = parseTime(endTime);
     const endDateTime = new Date(classDate);
     endDateTime.setHours(endHour, endMinute, 0, 0);
-    
+
     classes.push({
       startTime: startDateTime,
       endTime: endDateTime
     });
-    
+
     // Move to next week
     current.setDate(current.getDate() + 7);
   }
-  
+
   return classes;
 }
 
@@ -59,17 +59,24 @@ function generateClassDates(dayOfWeek: number, startTime: string, endTime: strin
 function parseTime(timeStr: string): [number, number] {
   const [time, period] = timeStr.split(' ');
   let [hours, minutes] = time.split(':').map(Number);
-  
+
   if (period === 'PM' && hours !== 12) hours += 12;
   if (period === 'AM' && hours === 12) hours = 0;
-  
+
   return [hours, minutes];
 }
 
 async function seed() {
   try {
     console.log('Starting seed...');
-    
+
+    // Clean up existing data first (in correct order for foreign key constraints)
+    console.log('Cleaning up existing data...');
+    await db.delete(yogaClassesTable);
+    await db.delete(classSeriesTable);
+    await db.delete(buildingsTable);
+    console.log('Cleanup complete.');
+
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 1);
     const endDate = new Date();
@@ -94,32 +101,13 @@ async function seed() {
 
     console.log(`Inserted ${buildings.length} buildings`);
 
-    // Create rooms for each building
-    const rooms = await db.insert(roomsTable).values([
-      {
-        roomName: 'Yoga Studio',
-        buildingId: buildings[0].id // Chester E Peters
-      },
-      {
-        roomName: 'Multipurpose Room',
-        buildingId: buildings[1].id // Multicultural Student Center
-      },
-      {
-        roomName: 'Community Room',
-        buildingId: buildings[2].id // Regnier Hall
-      }
-    ]).returning();
+    // Create a mapping for building names to IDs
+    const buildingNameToId: { [key: string]: number } = {};
+    for (const building of buildings) {
+      buildingNameToId[building.buildingName] = building.id;
+    }
 
-    console.log(`Inserted ${rooms.length} rooms`);
-
-    // Create a mapping for location names to room IDs
-    const locationToRoomId: { [key: string]: number } = {
-      'Chester E Peters Rec': rooms[0].id,
-      'Multicultural Student Center': rooms[1].id,
-      'Regnier Hall': rooms[2].id
-    };
-
-    // Generate all yoga classes
+    // Generate all yoga classes with building and room number
     const classTemplates = [
       {
         className: 'Yogalates',
@@ -129,7 +117,8 @@ async function seed() {
         endTime: '7:00 AM',
         matsProvided: true,
         description: 'COMBINATION OF YOGA AND PILATES FOR THE ULTIMATE WORKOUT! (ALL LEVELS)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Lift & Flow',
@@ -139,7 +128,8 @@ async function seed() {
         endTime: '7:15 PM',
         matsProvided: true,
         description: 'THIS CLASS COMBINES TRADITIONAL YOGA POSES WITH STRENGTH TRAINING USING LIGHT WEIGHTS. DESIGNED TO BUILD MUSCLE, IMPROVE BALANCE, AND INCREASE ENDURANCE, EACH SESSION BLENDS MINDFUL MOVEMENT WITH RESISTANCE BASED EXERCISES FOR A FULL-BODY WORKOUT. (ALL LEVELS)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Intermediate Yoga',
@@ -149,7 +139,8 @@ async function seed() {
         endTime: '8:30 PM',
         matsProvided: true,
         description: 'UTILIZING POSES TO HELP WITH STRENGTH AND FLEXIBILITY, THIS CLASS IS DESIGNED FOR STUDENTS WHO HAVE TAKEN YOGA BEFORE. THIS CLASS WILL HELP YOU TAKE YOUR PRACTICE TO THE NEXT LEVEL.',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Morning Yoga Flow',
@@ -159,7 +150,8 @@ async function seed() {
         endTime: '8:45 AM',
         matsProvided: true,
         description: 'SIMPLE YOGA POSITIONS WITH FOCUS ON BREATHING EXERCISES, DEEP RELAXATION TO INCREASE FLEXIBILITY, AND INCREASED WELL-BEING. (ALL LEVELS)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Gentle Yoga',
@@ -169,7 +161,8 @@ async function seed() {
         endTime: '8:30 PM',
         matsProvided: true,
         description: 'A GUIDED RESTFUL YOGA PRACTICE FOCUSED ON HOLDING POSES FOR LONGER DURATION TO HELP CALM YOUR MIND AND RELEASE TENSION IN YOUR MUSCLES. THIS CLASS WILL FOCUS ON SLOW MOVEMENTS, BREATHING TECHNIQUES, AND POSES. EMBRACE THE POWER OF REST. (LOW - MEDIUM IMPACT)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Rise & Shine Yoga',
@@ -179,7 +172,8 @@ async function seed() {
         endTime: '7:30 AM',
         matsProvided: true,
         description: 'SIMPLE YOGA POSITIONS WITH FOCUS ON BREATHING EXERCISES, DEEP RELAXATION TO INCREASE FLEXIBILITY, AND INCREASED WELL-BEING. (ALL LEVELS)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Intermediate Yoga',
@@ -189,7 +183,8 @@ async function seed() {
         endTime: '8:30 PM',
         matsProvided: true,
         description: 'UTILIZING POSES TO HELP WITH STRENGTH AND FLEXIBILITY, THIS CLASS IS DESIGNED FOR STUDENTS WHO HAVE TAKEN YOGA BEFORE. THIS CLASS WILL HELP YOU TAKE YOUR PRACTICE TO THE NEXT LEVEL.',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Morning Yoga Flow',
@@ -199,7 +194,8 @@ async function seed() {
         endTime: '8:45 AM',
         matsProvided: true,
         description: 'SIMPLE YOGA POSITIONS WITH FOCUS ON BREATHING EXERCISES, DEEP RELAXATION TO INCREASE FLEXIBILITY, AND INCREASED WELL-BEING. (ALL LEVELS)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Wake Up Flow',
@@ -209,55 +205,67 @@ async function seed() {
         endTime: '11:00 AM',
         matsProvided: true,
         description: 'SIMPLE YOGA POSITIONS WITH FOCUS ON BREATHING EXERCISES, DEEP RELAXATION TO INCREASE FLEXIBILITY, AND INCREASED WELL-BEING. (ALL LEVELS)',
-        location: 'Chester E Peters Rec'
+        buildingName: 'Chester E Peters Recreation Complex',
+        roomNumber: 'Yoga Studio'
       },
       {
         className: 'Noontime Yoga',
+        seriesName: 'Noontime Yoga',
         instructor: 'Dan',
         day: 2, // Tuesday
         startTime: '12:05 PM',
         endTime: '12:50 PM',
         matsProvided: false,
         description: 'A mindful midday break to stretch, breathe, and restore energy. Perfect for busy students and staff looking to reset during their lunch hour. (ALL LEVELS)',
-        location: 'Multicultural Student Center'
+        buildingName: 'Multicultural Student Center',
+        roomNumber: 'Room 002'
       },
       {
         className: 'Noontime Yoga',
+        seriesName: 'Noontime Yoga',
         instructor: 'Martha',
         day: 3, // Wednesday
         startTime: '12:05 PM',
         endTime: '12:50 PM',
         matsProvided: false,
         description: 'A mindful midday break to stretch, breathe, and restore energy. Perfect for busy students and staff looking to reset during their lunch hour. (ALL LEVELS)',
-        location: 'Multicultural Student Center'
+        buildingName: 'Multicultural Student Center',
+        roomNumber: 'Room 002'
       },
       {
         className: 'Noontime Yoga',
+        seriesName: 'Noontime Yoga',
         instructor: 'Kathryn',
         day: 4, // Thursday
         startTime: '12:05 PM',
         endTime: '12:50 PM',
         matsProvided: false,
         description: 'A mindful midday break to stretch, breathe, and restore energy. Perfect for busy students and staff looking to reset during their lunch hour. (ALL LEVELS)',
-        location: 'Regnier Hall'
+        buildingName: 'Regnier Hall',
+        roomNumber: 'Community Room'
       },
       {
         className: 'Noontime Yoga',
+        seriesName: 'Noontime Yoga',
         instructor: 'Ayumi',
         day: 5, // Friday
         startTime: '12:05 PM',
         endTime: '12:50 PM',
         matsProvided: false,
         description: 'A mindful midday break to stretch, breathe, and restore energy. Perfect for busy students and staff looking to reset during their lunch hour. (ALL LEVELS)',
-        location: 'Multicultural Student Center'
+        buildingName: 'Multicultural Student Center',
+        roomNumber: 'Room 002'
       }
     ];
 
-    // Group templates into series (by className + startTime)
+    // Group templates into series (by seriesName + instructor if provided, otherwise className + startTime)
     const seriesMap = new Map<string, typeof classTemplates>();
 
     for (const template of classTemplates) {
-      const seriesKey = `${template.className}|${template.startTime}`;
+      // Use seriesName + instructor + building + room as key to keep instructors separate
+      const seriesKey = template.seriesName
+        ? `${template.seriesName}|${template.instructor}|${template.buildingName}|${template.roomNumber}`
+        : `${template.className}|${template.startTime}`;
       if (!seriesMap.has(seriesKey)) {
         seriesMap.set(seriesKey, []);
       }
@@ -273,28 +281,24 @@ async function seed() {
       const firstTemplate = templates[0];
       const recurrenceDays = templates.map(t => t.day).sort((a, b) => a - b);
 
-      // Determine defaults based on consistency across templates
-      const allSameInstructor = templates.every(t => t.instructor === firstTemplate.instructor);
-      const allSameLocation = templates.every(t => t.location === firstTemplate.location);
-      const allSameMats = templates.every(t => t.matsProvided === firstTemplate.matsProvided);
-
       // Format time for series (convert "6:15 AM" to "06:15")
       const formatTimeForSeries = (timeStr: string): string => {
         const [hours, minutes] = parseTime(timeStr);
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
       };
 
-      // Create series entry
+      // Create series entry with building_id and room_number
       const [series] = await db.insert(classSeriesTable).values({
-        seriesName: firstTemplate.className,
+        seriesName: firstTemplate.seriesName || firstTemplate.className,
         seriesDescription: firstTemplate.description,
         recurrencePattern: 'weekly',
         recurrenceDays: recurrenceDays,
         startTime: formatTimeForSeries(firstTemplate.startTime),
         endTime: formatTimeForSeries(firstTemplate.endTime),
-        defaultInstructorName: allSameInstructor ? firstTemplate.instructor : null,
-        defaultRoomId: allSameLocation ? locationToRoomId[firstTemplate.location] : null,
-        defaultMatsProvided: allSameMats ? firstTemplate.matsProvided : false,
+        instructorName: firstTemplate.instructor,
+        buildingId: buildingNameToId[firstTemplate.buildingName],
+        roomNumber: firstTemplate.roomNumber,
+        matsProvided: firstTemplate.matsProvided,
         seriesStartDate: startDate.toISOString().split('T')[0],
         seriesEndDate: null, // Ongoing
         isActive: true
@@ -316,7 +320,8 @@ async function seed() {
             classDescription: template.description,
             isCancelled: false,
             instructorName: template.instructor,
-            roomId: locationToRoomId[template.location]
+            buildingId: buildingNameToId[template.buildingName],
+            roomNumber: template.roomNumber
           });
         }
       }
@@ -336,4 +341,4 @@ async function seed() {
   }
 }
 
-//seed();
+// seed();

@@ -44,10 +44,10 @@ export function DeleteAccountButton() {
       <Button
         variant="ghost"
         onClick={() => setDialogOpen(true)}
-        className="w-full text-xs text-muted-foreground hover:text-foreground"
+        className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
       >
-        <Trash2 className="h-3 w-3 mr-2" />
-        Delete Account
+        <Trash2 className="h-4 w-4 mr-2" />
+        Delete my account
       </Button>
 
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>

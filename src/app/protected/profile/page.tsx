@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 import { ClassesTabs } from "./classes-tabs";
 import { DeleteAccountButton } from "./delete-account-button";
-import { Banana } from "lucide-react";
+import { Banana, Calendar, CheckCircle2 } from "lucide-react";
 import { getUserUpcomingClasses, getUserPastClasses } from "@/lib/actions";
 
 async function ProfileContent() {
@@ -44,61 +46,117 @@ async function ProfileContent() {
 
 
 
-  return (
-    <div className="w-full h-[calc(100vh-1rem)] overflow-hidden flex justify-center">
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-8 w-full max-w-7xl h-full px-5 pt-8">
-        {/* Left Sidebar - User Info */}
-        <div className="space-y-6 h-fit">
-          <Card className="bg-gradient-to-br from-[#644874]/10 via-[#644874]/5 to-[#6B92B5]/10 dark:from-[#644874]/30 dark:via-[#644874]/20 dark:to-[#6B92B5]/20 border-2 border-[#644874]/20 dark:border-[#644874]/40 sticky top-8">
-            <CardHeader className="pb-0 space-y-3">
-              <div className="flex lg:flex-col items-start lg:items-center gap-3 lg:gap-0">
-                <div className="w-8 h-8 lg:w-24 lg:h-24 rounded-full bg-gradient-to-r from-[#644874] to-[#6B92B5] lg:mx-auto lg:mb-4 flex items-center justify-center text-white text-sm lg:text-3xl font-bold flex-shrink-0">
-                  {userData.first_name[0]}{userData.last_name[0]}
-                </div>
-                <div className="flex-1 lg:flex-none space-y-1 lg:space-y-0">
-                  <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-[#644874] to-[#6B92B5] bg-clip-text text-transparent lg:text-center lg:mb-2">
-                    {userData.first_name} {userData.last_name}
-                  </h1>
-                  <p className="text-sm text-muted-foreground lg:text-center lg:mb-4">{userData.kstate_email}</p>
-                </div>
-              </div>
-              <div className="flex lg:justify-center">
-                <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground bg-background/50 px-3 py-1.5 rounded-full">
-                  <Banana className="h-3 w-3 text-yellow-500" />
-                  <span className="whitespace-nowrap">
-                    Yoga-ing since {new Date(userData.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-              </div>
-            </CardHeader>
+  // Calculate stats
+  const upcomingCount = upcomingClasses.length;
+  const attendedCount = pastClasses.filter(c => c.attended).length;
+  const memberSince = new Date(userData.created_at).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
 
-            <CardContent className="pt-6">
-              <div className="space-y-3 border-t border-[#644874]/20 dark:border-[#644874]/30 pt-6 mx-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Upcoming Classes</span>
-                  <span className="font-semibold text-[#644874] dark:text-[#9d7fb0]">{upcomingClasses.length}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Classes Attended</span>
-                  <span className="font-semibold text-[#644874] dark:text-[#9d7fb0]">
-                    {pastClasses.filter(c => c.attended).length}
-                  </span>
-                </div>
+  // Get time of day greeting
+  const hour = new Date().getHours();
+  let greeting = "Good morning";
+  if (hour >= 12 && hour < 17) greeting = "Good afternoon";
+  else if (hour >= 17) greeting = "Good evening";
+
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Hero Banner with Gradient */}
+      <div className="relative bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white pt-12 pb-24 px-4">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-end gap-6">
+          <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center text-3xl font-bold shadow-xl">
+            {userData.first_name[0]}{userData.last_name[0]}
+          </div>
+          <div className="text-center md:text-left mb-2 flex-1">
+            <p className="text-white/80 font-medium mb-1">{greeting},</p>
+            <h1 className="text-4xl font-bold">{userData.first_name} {userData.last_name}</h1>
+            <p className="text-white/80 text-sm mt-1">{userData.kstate_email}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 -mt-12 relative z-10">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="border-none shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 rounded-full bg-[#644874]/10 dark:bg-[#644874]/20 text-[#644874] dark:text-[#9d7fb0]">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Upcoming Classes</p>
+                <p className="text-2xl font-bold">{upcomingCount}</p>
               </div>
             </CardContent>
           </Card>
 
-          <DeleteAccountButton />
+          <Card className="border-none shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 rounded-full bg-[#6B92B5]/10 dark:bg-[#6B92B5]/20 text-[#6B92B5] dark:text-[#8fb3d1]">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Classes Attended</p>
+                <p className="text-2xl font-bold">{attendedCount}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 rounded-full bg-yellow-500/10 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-500">
+                <Banana className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Member Since</p>
+                <p className="text-lg font-bold">{memberSince}</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Right Content - Classes */}
-        <div className="w-full min-w-0 max-w-full h-full flex flex-col min-h-0">
-          <h2 className="text-3xl font-bold mb-3 flex-shrink-0">My Classes</h2>
-          <div className="flex-1 min-h-0">
+        {/* Main Content Area with Sidebar */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Column - Schedule */}
+          <div className="flex-1 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">My Schedule</h2>
+              <Link href="/schedule">
+                <Button variant="outline" size="sm" className="hidden md:flex">
+                  Browse Full Schedule
+                </Button>
+              </Link>
+            </div>
             <ClassesTabs upcomingClasses={upcomingClasses} pastClasses={pastClasses} />
+          </div>
+
+          {/* Right Sidebar - Actions */}
+          <div className="lg:w-80 space-y-4">
+            {/* Contact Support Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Need Help?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" className="w-full" asChild>
+                  <a href="mailto:recservices@k-state.edu">
+                    Contact Support
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Account Settings Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Account Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DeleteAccountButton />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

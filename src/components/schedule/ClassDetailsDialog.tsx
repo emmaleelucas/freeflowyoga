@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { YogaClass } from "@/lib/types"
-import { MapPin, User, AlignLeft, CalendarClock, CheckCircle2, X } from "lucide-react"
+import { MapPin, User, AlignLeft, Calendar, CheckCircle2, X, Clock } from "lucide-react"
 import { registerForClass, unregisterFromClass } from "@/lib/actions"
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -122,6 +122,25 @@ export function ClassDetailsDialog({
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(yogaClass.location.address)}`
     : null;
 
+  // Calculate class duration
+  const getClassDuration = () => {
+    const [startHours, startMinutes] = yogaClass.startTime.split(':').map(Number);
+    const [endHours, endMinutes] = yogaClass.endTime.split(':').map(Number);
+    const startTotal = startHours * 60 + startMinutes;
+    const endTotal = endHours * 60 + endMinutes;
+    const durationMinutes = endTotal - startTotal;
+
+    if (durationMinutes >= 60) {
+      const hours = Math.floor(durationMinutes / 60);
+      const mins = durationMinutes % 60;
+      if (mins === 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+      }
+      return `${hours}h ${mins}m`;
+    }
+    return `${durationMinutes} min`;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -129,9 +148,24 @@ export function ClassDetailsDialog({
           <DialogTitle className="text-xl font-bold bg-gradient-to-r from-[#644874] to-[#6B92B5] bg-clip-text text-transparent">
             {yogaClass.className}
           </DialogTitle>
-          <DialogDescription className="text-sm text-foreground font-bold flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
-            {formatDateTime(yogaClass.date, yogaClass.startTime, yogaClass.endTime)}
+          <DialogDescription className="text-sm text-foreground font-medium flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
+            <span>{(() => {
+              const [year, month, day] = yogaClass.date.split('-').map(Number);
+              const date = new Date(year, month - 1, day);
+              return date.toLocaleDateString("en-US", { weekday: 'long', month: 'short', day: 'numeric' });
+            })()}</span>
+            <span>•</span>
+            <Clock className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
+            <span>{(() => {
+              const formatTimeShort = (time: string) => {
+                const [hours, minutes] = time.split(':').map(Number);
+                const period = hours >= 12 ? 'pm' : 'am';
+                const hour12 = hours % 12 || 12;
+                return `${hour12}:${minutes.toString().padStart(2, '0')}${period}`;
+              };
+              return `${formatTimeShort(yogaClass.startTime)} - ${formatTimeShort(yogaClass.endTime)}`;
+            })()}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -268,8 +302,24 @@ export function ClassDetailsDialog({
               ) : null}
             </div>
           )}
+
+          {/* Sign in prompt for unauthenticated users */}
+          {!yogaClass.isCancelled && !isAuthenticated && !isClassStarted && (
+            <div className="mt-6 pt-6 border-t">
+              <div className="bg-[#644874]/5 border border-[#644874]/20 rounded-lg p-4 dark:bg-[#644874]/10 dark:border-[#644874]/30">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Sign in to register for this class and track your yoga journey.
+                </p>
+                <Link href="/auth/login">
+                  <Button className="w-full bg-[#644874] hover:bg-[#553965] dark:bg-[#644874] dark:hover:bg-[#553965]">
+                    Sign In to Register
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </DialogContent >
+    </Dialog >
   )
 }

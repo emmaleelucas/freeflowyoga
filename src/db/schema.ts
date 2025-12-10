@@ -10,23 +10,17 @@ export const usersTable = pgTable("users", {
   role: varchar("role", { length: 50 }).notNull().default("student"), // 'student' or 'admin'
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  is_admin: boolean("is_admin").default(false).notNull(),
 });
 
-// Buildings Table
+// Buildings Table - Contains all campus building names
 export const buildingsTable = pgTable("buildings", {
   id: serial("id").primaryKey(),
-  buildingName: varchar("building_name", { length: 255 }).notNull(),
-  buildingAddress: varchar("building_address", { length: 500 }).notNull(),
+  buildingName: varchar("building_name", { length: 255 }).notNull().unique(),
+  buildingAddress: varchar("building_address", { length: 500 }),
 });
 
-// Rooms Table
-export const roomsTable = pgTable("rooms", {
-  id: serial("id").primaryKey(),
-  roomName: varchar("room_name", { length: 100 }).notNull(),
-  buildingId: integer("building_id").references(() => buildingsTable.id).notNull(),
-});
-
-// Class Series Table - Lightweight series management
+// Class Series Table - Recurring class template with consistent instructor and location
 export const classSeriesTable = pgTable("class_series", {
   id: serial("id").primaryKey(),
 
@@ -42,10 +36,14 @@ export const classSeriesTable = pgTable("class_series", {
   startTime: varchar("start_time", { length: 5 }).notNull(), // "12:00"
   endTime: varchar("end_time", { length: 5 }).notNull(), // "13:00"
 
-  // Default values (can be overridden by instances)
-  defaultInstructorName: varchar("default_instructor_name", { length: 255 }), // null if varies
-  defaultRoomId: integer("default_room_id").references(() => roomsTable.id), // null if varies
-  defaultMatsProvided: boolean("default_mats_provided").default(false).notNull(),
+  // Instructor - REQUIRED for all classes in the series
+  instructorName: varchar("instructor_name", { length: 255 }).notNull(),
+
+  // Location - building reference + room number
+  buildingId: integer("building_id").references(() => buildingsTable.id).notNull(),
+  roomNumber: varchar("room_number", { length: 50 }).notNull(),
+
+  matsProvided: boolean("mats_provided").default(false).notNull(),
 
   // Series lifecycle
   seriesStartDate: date("series_start_date").notNull(),
@@ -71,9 +69,12 @@ export const yogaClassesTable = pgTable("yoga_classes", {
   classDescription: text("class_description").notNull(),
   isCancelled: boolean("is_cancelled").default(false).notNull(),
 
-  // Can be different from series defaults
+  // Instructor
   instructorName: varchar("instructor_name", { length: 255 }).notNull(),
-  roomId: integer("room_id").references(() => roomsTable.id).notNull(),
+
+  // Location - building reference + room number
+  buildingId: integer("building_id").references(() => buildingsTable.id).notNull(),
+  roomNumber: varchar("room_number", { length: 50 }).notNull(),
 
   currentEnrollment: integer("current_enrollment").notNull().default(0),
 });
@@ -96,23 +97,14 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
 }));
 
 export const buildingsRelations = relations(buildingsTable, ({ many }) => ({
-  rooms: many(roomsTable),
-}));
-
-export const roomsRelations = relations(roomsTable, ({ one, many }) => ({
-  building: one(buildingsTable, {
-    fields: [roomsTable.buildingId],
-    references: [buildingsTable.id],
-  }),
-  yogaClasses: many(yogaClassesTable),
-  defaultForSeries: many(classSeriesTable, { relationName: "defaultRoom" }),
+  series: many(classSeriesTable),
+  classes: many(yogaClassesTable),
 }));
 
 export const classSeriesRelations = relations(classSeriesTable, ({ one, many }) => ({
-  defaultRoom: one(roomsTable, {
-    fields: [classSeriesTable.defaultRoomId],
-    references: [roomsTable.id],
-    relationName: "defaultRoom",
+  building: one(buildingsTable, {
+    fields: [classSeriesTable.buildingId],
+    references: [buildingsTable.id],
   }),
   classInstances: many(yogaClassesTable),
 }));
@@ -122,9 +114,9 @@ export const yogaClassesRelations = relations(yogaClassesTable, ({ one, many }) 
     fields: [yogaClassesTable.seriesId],
     references: [classSeriesTable.id],
   }),
-  room: one(roomsTable, {
-    fields: [yogaClassesTable.roomId],
-    references: [roomsTable.id],
+  building: one(buildingsTable, {
+    fields: [yogaClassesTable.buildingId],
+    references: [buildingsTable.id],
   }),
   attendance: many(classAttendanceTable),
 }));

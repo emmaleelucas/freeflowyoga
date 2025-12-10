@@ -26,7 +26,7 @@ export async function AuthButton() {
   // Get user profile from users table
   const { data: userData } = await supabase
     .from('users')
-    .select('first_name, last_name, kstate_email')
+    .select('first_name, last_name, kstate_email, is_admin')
     .eq('id', userId)
     .single();
 
@@ -49,6 +49,7 @@ export async function AuthButton() {
       firstName={userData.first_name}
       lastName={userData.last_name}
       email={userData.kstate_email}
+      isAdmin={userData.is_admin ?? false}
     />
   );
 }

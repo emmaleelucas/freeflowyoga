@@ -98,12 +98,17 @@ export default function Calendar({ allClasses, initialClassId }: CalendarProps) 
   } | null>(null)
   const hasOpenedInitialClassRef = useRef(false)
 
-  // Open dialog for initial class if provided via URL
+  // Open dialog for initial class if provided via URL and navigate to its week
   useEffect(() => {
     if (initialClassId && !hasOpenedInitialClassRef.current && classes.length > 0) {
       const classToOpen = classes.find(c => c.id === initialClassId)
       if (classToOpen) {
         hasOpenedInitialClassRef.current = true
+
+        // Navigate calendar to the week containing this class
+        const classDate = new Date(classToOpen.date)
+        setCurrentDate(classDate)
+
         setSelectedClass(classToOpen)
         checkUserRegistration(classToOpen.id).then(regData => {
           setRegistrationData(regData)
@@ -196,11 +201,10 @@ export default function Calendar({ allClasses, initialClassId }: CalendarProps) 
                   setCurrentDate(new Date())
                   setViewMode("month")
                 }}
-                className={`!rounded-none h-full px-4 transition-all duration-300 ${
-                  viewMode === "month"
-                    ? "bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white hover:from-[#553965] hover:to-[#5A7FA0]"
-                    : "text-gray-600 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20"
-                }`}
+                className={`!rounded-none h-full px-4 transition-all duration-300 ${viewMode === "month"
+                  ? "bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white hover:from-[#553965] hover:to-[#5A7FA0]"
+                  : "text-gray-600 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20"
+                  }`}
               >
                 Month
               </Button>
@@ -211,18 +215,38 @@ export default function Calendar({ allClasses, initialClassId }: CalendarProps) 
                   setCurrentDate(new Date())
                   setViewMode("week")
                 }}
-                className={`!rounded-none h-full px-4 transition-all duration-300 ${
-                  viewMode === "week"
-                    ? "bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white hover:from-[#553965] hover:to-[#5A7FA0]"
-                    : "text-gray-600 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20"
-                }`}
+                className={`!rounded-none h-full px-4 transition-all duration-300 ${viewMode === "week"
+                  ? "bg-gradient-to-r from-[#644874] to-[#6B92B5] text-white hover:from-[#553965] hover:to-[#5A7FA0]"
+                  : "text-gray-600 dark:text-gray-400 hover:text-[#644874] dark:hover:text-[#9d7fb0] hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20"
+                  }`}
               >
                 Week
               </Button>
             </div>
           )}
 
-          <div className="flex gap-1">
+          <div className="flex gap-2">
+            {/* Today button - only show when not viewing current week */}
+            {(() => {
+              const todayWeekStart = getWeekStart(new Date())
+              const currentWeekStart = getWeekStart(currentDate)
+              const isCurrentWeek = todayWeekStart.toDateString() === currentWeekStart.toDateString()
+
+              if (!isCurrentWeek) {
+                return (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentDate(new Date())}
+                    className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-[#644874]/20 dark:border-[#644874]/30 hover:bg-[#644874]/10 dark:hover:bg-[#644874]/20 hover:border-[#644874]/40 dark:hover:border-[#644874]/50 transition-all duration-300 text-[#644874] dark:text-[#9d7fb0]"
+                  >
+                    Today
+                  </Button>
+                )
+              }
+              return null
+            })()}
+
             <Button
               variant="outline"
               size="icon"

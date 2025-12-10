@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut } from "lucide-react";
+import { UserCircle, LogOut, Shield } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,9 +17,10 @@ interface UserDropdownProps {
   firstName: string;
   lastName: string;
   email: string;
+  isAdmin: boolean;
 }
 
-export function UserDropdown({ firstName, lastName, email }: UserDropdownProps) {
+export function UserDropdown({ firstName, lastName, email, isAdmin }: UserDropdownProps) {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -47,6 +48,14 @@ export function UserDropdown({ firstName, lastName, email }: UserDropdownProps) 
             Profile
           </Link>
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/admin" className="cursor-pointer flex items-center gap-2 focus:bg-[#644874]/10 dark:focus:bg-[#644874]/20 focus:text-[#644874] dark:focus:text-[#9d7fb0]">
+              <Shield className="h-4 w-4 text-[#644874] dark:text-[#9d7fb0]" />
+              Admin Dashboard
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator className="bg-[#644874]/20 dark:bg-[#644874]/30" />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer flex items-center gap-2 focus:bg-rose-50 dark:focus:bg-rose-900/20 focus:text-rose-700 dark:focus:text-rose-300">
           <LogOut className="h-4 w-4" />

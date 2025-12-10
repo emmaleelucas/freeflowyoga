@@ -36,6 +36,7 @@ interface CampusMapProps {
   hoveredSeriesIds: number[];
   onPinHover: (ids: number[]) => void;
   onVisibleLocationsChange?: (locationAddresses: string[]) => void;
+  dismissTooltipTrigger?: number; // Increment to dismiss tooltip from parent
 }
 
 type LocationData = {
@@ -247,7 +248,32 @@ function VisibleLocationTracker({
   return <VisibleLocationTrackerInner locations={locations} onVisibleLocationsChange={onVisibleLocationsChange} />;
 }
 
-export function CampusMap({ series, classLocations, allClassLocations, hoveredSeriesIds, onPinHover, onVisibleLocationsChange }: CampusMapProps) {
+// Component to handle clicks on the map background
+function MapClickHandler({ onMapClick }: { onMapClick: () => void }) {
+  const MapClickComponent = useMemo(() => {
+    return dynamic(
+      () =>
+        import("react-leaflet").then((mod) => {
+          const { useMapEvents } = mod;
+          return {
+            default: () => {
+              useMapEvents({
+                click: () => {
+                  onMapClick();
+                },
+              });
+              return null;
+            },
+          };
+        }),
+      { ssr: false }
+    ) as any;
+  }, [onMapClick]);
+
+  return <MapClickComponent />;
+}
+
+export function CampusMap({ series, classLocations, allClassLocations, hoveredSeriesIds, onPinHover, onVisibleLocationsChange, dismissTooltipTrigger }: CampusMapProps) {
   const [allGeocodedLocations, setAllGeocodedLocations] = useState<LocationData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
@@ -484,6 +510,14 @@ export function CampusMap({ series, classLocations, allClassLocations, hoveredSe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTooltip?.locationAddress, currentSeriesIdx]);
 
+  // Close tooltip when parent triggers dismissal (e.g., filters button click, card hover)
+  useEffect(() => {
+    if (dismissTooltipTrigger && dismissTooltipTrigger > 0) {
+      setActiveTooltip(null);
+      // Note: Don't call onPinHover here - parent manages hoveredSeriesIds directly
+    }
+  }, [dismissTooltipTrigger]);
+
   return (
     <div className="sticky top-8 h-full">
       <div ref={mapContainerRef} className="relative w-full h-full rounded-lg overflow-hidden border-2 border-[#644874]/30 dark:border-[#644874]/40">
@@ -509,6 +543,11 @@ export function CampusMap({ series, classLocations, allClassLocations, hoveredSe
               style={{ height: '100%', width: '100%' }}
               className="z-0 simplified-map"
             >
+              {/* Click handler for map background - closes tooltip */}
+              <MapClickHandler onMapClick={() => {
+                setActiveTooltip(null);
+                onPinHover([]);
+              }} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -525,8 +564,8 @@ export function CampusMap({ series, classLocations, allClassLocations, hoveredSe
                   hoveredLocationAddress === location.address ||
                   activeTooltip?.locationAddress === location.address ||
                   (hoveredSeriesIds.length > 0 &&
-                   hoveredLocationAddress === null &&
-                   hoveredSeriesIds.some(id => location.seriesIds.includes(id)));
+                    hoveredLocationAddress === null &&
+                    hoveredSeriesIds.some(id => location.seriesIds.includes(id)));
 
                 // Create a ref for this marker
                 const markerKey = `${location.address}-${idx}`;

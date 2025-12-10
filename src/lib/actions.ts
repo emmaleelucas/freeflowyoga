@@ -30,12 +30,10 @@ export async function getAllYogaClasses(): Promise<OldYogaClass[]> {
       instructor_name,
       class_description,
       mats_provided,
-      rooms (
-        room_name,
-        buildings (
-          building_name,
-          building_address
-        )
+      room_number,
+      buildings (
+        building_name,
+        building_address
       )
     `)
     .gte('start_time', new Date().toISOString())
@@ -72,9 +70,9 @@ export async function getAllYogaClasses(): Promise<OldYogaClass[]> {
     instructorName: classData.instructor_name,
     classDescription: classData.class_description,
     matsProvided: classData.mats_provided,
-    roomName: classData.rooms?.room_name || 'TBA',
-    buildingName: classData.rooms?.buildings?.building_name || 'TBA',
-    buildingAddress: classData.rooms?.buildings?.building_address || 'TBA'
+    roomName: classData.room_number || 'TBA',
+    buildingName: classData.buildings?.building_name || 'TBA',
+    buildingAddress: classData.buildings?.building_address || 'TBA'
   }));
 }
 
@@ -92,12 +90,10 @@ export async function getAllYogaClassesIncludingPast(): Promise<OldYogaClass[]> 
       instructor_name,
       class_description,
       mats_provided,
-      rooms (
-        room_name,
-        buildings (
-          building_name,
-          building_address
-        )
+      room_number,
+      buildings (
+        building_name,
+        building_address
       )
     `)
     .order('start_time', { ascending: true });
@@ -133,9 +129,9 @@ export async function getAllYogaClassesIncludingPast(): Promise<OldYogaClass[]> 
     instructorName: classData.instructor_name,
     classDescription: classData.class_description,
     matsProvided: classData.mats_provided,
-    roomName: classData.rooms?.room_name || 'TBA',
-    buildingName: classData.rooms?.buildings?.building_name || 'TBA',
-    buildingAddress: classData.rooms?.buildings?.building_address || 'TBA'
+    roomName: classData.room_number || 'TBA',
+    buildingName: classData.buildings?.building_name || 'TBA',
+    buildingAddress: classData.buildings?.building_address || 'TBA'
   }));
 }
 
@@ -283,12 +279,10 @@ export async function getUserUpcomingClasses() {
         class_description,
         mats_provided,
         is_cancelled,
-        rooms (
-          room_name,
-          buildings (
-            building_name,
-            building_address
-          )
+        room_number,
+        buildings (
+          building_name,
+          building_address
         )
       )
     `)
@@ -335,12 +329,10 @@ export async function getUserPastClasses() {
         class_description,
         mats_provided,
         is_cancelled,
-        rooms (
-          room_name,
-          buildings (
-            building_name,
-            building_address
-          )
+        room_number,
+        buildings (
+          building_name,
+          building_address
         )
       )
     `)
@@ -415,12 +407,10 @@ export async function getAllSeries(): Promise<SeriesWithDetails[]> {
         instructor_name,
         start_time,
         mats_provided,
-        rooms (
-          room_name,
-          buildings (
-            building_name,
-            building_address
-          )
+        room_number,
+        buildings (
+          building_name,
+          building_address
         )
       `)
       .eq('series_id', series.id)
@@ -443,16 +433,16 @@ export async function getAllSeries(): Promise<SeriesWithDetails[]> {
 
     // Aggregate location data
     const locationStrings = instances.map((i: any) =>
-      `${i.rooms?.buildings?.building_name}|${i.rooms?.room_name}`
+      `${i.buildings?.building_name}|${i.room_number}`
     );
     const uniqueLocations = new Set(locationStrings);
     const hasMultipleLocations = uniqueLocations.size > 1;
 
     const firstInstance = instances[0] as any;
     const location = hasMultipleLocations ? null : {
-      room: firstInstance.rooms?.room_name || 'TBA',
-      building: firstInstance.rooms?.buildings?.building_name || 'TBA',
-      address: firstInstance.rooms?.buildings?.building_address || 'TBA'
+      room: firstInstance.room_number || 'TBA',
+      building: firstInstance.buildings?.building_name || 'TBA',
+      address: firstInstance.buildings?.building_address || 'TBA'
     };
 
     // Get next class date
@@ -502,12 +492,10 @@ export async function getAllClassLocations() {
     .from('yoga_classes')
     .select(`
       series_id,
-      rooms (
-        room_name,
-        buildings (
-          building_name,
-          building_address
-        )
+      room_number,
+      buildings (
+        building_name,
+        building_address
       )
     `)
     .gte('start_time', new Date().toISOString());
@@ -529,8 +517,8 @@ export async function getAllClassLocations() {
   }>();
 
   data.forEach((classInstance: any) => {
-    const address = classInstance.rooms?.buildings?.building_address;
-    const building = classInstance.rooms?.buildings?.building_name;
+    const address = classInstance.buildings?.building_address;
+    const building = classInstance.buildings?.building_name;
     const seriesId = classInstance.series_id;
 
     if (address && address !== 'TBA' && building) {

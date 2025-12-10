@@ -10,8 +10,6 @@ import { SeriesWithDetails } from "@/lib/actions";
 
 export type Filters = {
   timeOfDay: string[];
-  classType: string[];
-  level: string;
   matsProvided: boolean | null;
 };
 
@@ -30,11 +28,10 @@ export function ExploreContent({ series, classLocations }: ExploreContentProps) 
   const [hoveredSeriesIds, setHoveredSeriesIds] = useState<number[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [visibleLocationAddresses, setVisibleLocationAddresses] = useState<string[]>([]);
+  const [dismissTooltipTrigger, setDismissTooltipTrigger] = useState(0);
 
   const [filters, setFilters] = useState<Filters>({
     timeOfDay: [],
-    classType: [],
-    level: "alllevels",
     matsProvided: null,
   });
 
@@ -44,10 +41,14 @@ export function ExploreContent({ series, classLocations }: ExploreContentProps) 
     if (filters.timeOfDay.length > 0) {
       const hour = parseInt(s.startTime.split(':')[0]);
       const timeMatches = filters.timeOfDay.some(time => {
-        if (time === 'morning' && hour >= 6 && hour < 12) return true;
-        if (time === 'midday' && hour >= 12 && hour < 15) return true;
-        if (time === 'afternoon' && hour >= 15 && hour < 18) return true;
-        if (time === 'evening' && hour >= 18) return true;
+        // Morning: 6am - 11am (6:00 - 10:59)
+        if (time === 'morning' && hour >= 6 && hour < 11) return true;
+        // Midday: 11am - 1pm (11:00 - 12:59)
+        if (time === 'midday' && hour >= 11 && hour < 13) return true;
+        // Afternoon: 1pm - 5pm (13:00 - 16:59)
+        if (time === 'afternoon' && hour >= 13 && hour < 17) return true;
+        // Evening: 5pm - 9pm (17:00 - 20:59)
+        if (time === 'evening' && hour >= 17 && hour < 21) return true;
         return false;
       });
       if (!timeMatches) return false;
@@ -79,6 +80,18 @@ export function ExploreContent({ series, classLocations }: ExploreContentProps) 
     }))
     .filter(location => location.seriesIds.length > 0);
 
+  const handleFiltersClick = () => {
+    setDismissTooltipTrigger(prev => prev + 1); // Dismiss any open tooltip
+    setFiltersOpen(true);
+  };
+
+  const handleSeriesHover = (id: number | null) => {
+    if (id !== null) {
+      setDismissTooltipTrigger(prev => prev + 1); // Dismiss tooltip when hovering a card
+    }
+    setHoveredSeriesIds(id ? [id] : []);
+  };
+
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
@@ -88,7 +101,7 @@ export function ExploreContent({ series, classLocations }: ExploreContentProps) 
           </h1>
         </div>
         <Button
-          onClick={() => setFiltersOpen(true)}
+          onClick={handleFiltersClick}
           variant="outline"
           className="gap-2"
         >
@@ -102,7 +115,7 @@ export function ExploreContent({ series, classLocations }: ExploreContentProps) 
           <ClassGrid
             series={filteredSeries}
             hoveredSeriesIds={hoveredSeriesIds}
-            onSeriesHover={(id) => setHoveredSeriesIds(id ? [id] : [])}
+            onSeriesHover={handleSeriesHover}
           />
         </div>
         <div className="hidden lg:block h-[calc(100vh-200px)]">
@@ -113,6 +126,7 @@ export function ExploreContent({ series, classLocations }: ExploreContentProps) 
             hoveredSeriesIds={hoveredSeriesIds}
             onPinHover={(ids) => setHoveredSeriesIds(ids)}
             onVisibleLocationsChange={setVisibleLocationAddresses}
+            dismissTooltipTrigger={dismissTooltipTrigger}
           />
         </div>
       </div>

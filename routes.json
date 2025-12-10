@@ -1,0 +1,179 @@
+{
+    "routes": [
+        {
+            "name": "West Route",
+            "color": "#556B2F",
+            "stops": [
+                {
+                    "number": 1,
+                    "name": "Ryerson",
+                    "location": "9th/Ryerson",
+                    "state": "MO"
+                },
+                {
+                    "number": 2,
+                    "name": "Old Price Chopper",
+                    "location": "43rd/State Ave",
+                    "state": "KS",
+                    "notes": "SW corner parking lot"
+                },
+                {
+                    "number": 3,
+                    "name": "Kansas Ave",
+                    "location": "69 Hwy/18th St",
+                    "state": "KS",
+                    "notes": "Under overpass"
+                },
+                {
+                    "number": 4,
+                    "name": "Shawnee Park",
+                    "location": "Approx 710 S. Packard",
+                    "state": "KS"
+                },
+                {
+                    "number": 5,
+                    "name": "Bike Bridge",
+                    "location": "3rd/Armstrong",
+                    "state": "KS"
+                },
+                {
+                    "number": 6,
+                    "name": "West Bottoms",
+                    "location": "I-670/Genesse St",
+                    "state": "MO"
+                },
+                {
+                    "number": 7,
+                    "name": "Chavez",
+                    "location": "Avenida Chavez & Allen Rd",
+                    "state": "MO"
+                }
+            ]
+        },
+        {
+            "name": "Central Route",
+            "color": "#644874",
+            "stops": [
+                {
+                    "number": 1,
+                    "name": "18th/Troost",
+                    "state": "MO",
+                    "notes": "Under highway"
+                },
+                {
+                    "number": 2,
+                    "name": "I-35/Pennway",
+                    "state": "MO",
+                    "notes": "Across from Fire Station"
+                },
+                {
+                    "number": 3,
+                    "name": "6th/Broadway",
+                    "state": "MO",
+                    "notes": "SE corner"
+                },
+                {
+                    "number": 4,
+                    "name": "ATM",
+                    "state": "MO",
+                    "location": "Independence/Grand"
+                },
+                {
+                    "number": 5,
+                    "name": "Guinotte",
+                    "location": "Under 9 Hwy",
+                    "state": "MO",
+                    "notes": "Heart of America Bridge"
+                },
+                {
+                    "number": 6,
+                    "name": "Train Tracks",
+                    "location": "East of 1st/Campbell",
+                    "state": "MO"
+                },
+                {
+                    "number": 7,
+                    "name": "14th/Benton",
+                    "location": "Truman/Benton",
+                    "state": "MO"
+                }
+            ]
+        },
+        {
+            "name": "Midtown Route",
+            "color": "#C08081",
+            "stops": [
+                {
+                    "number": 1,
+                    "name": "St Stephen's",
+                    "location": "Truman/Paseo",
+                    "state": "MO"
+                },
+                {
+                    "number": 2,
+                    "name": "Rockhill/Volker",
+                    "location": "58th/Rockhill",
+                    "state": "MO"
+                },
+                {
+                    "number": 3,
+                    "name": "45th/Garfield",
+                    "location": "North of Cleaver",
+                    "state": "MO",
+                    "notes": "East of Garfield"
+                },
+                {
+                    "number": 4,
+                    "name": "Pick N Pull",
+                    "location": "8012 E Truman",
+                    "state": "MO"
+                },
+                {
+                    "number": 5,
+                    "name": "Sheffield Park",
+                    "location": "~1100 Winchester",
+                    "state": "MO",
+                    "notes": "Near ballfield"
+                }
+            ]
+        },
+        {
+            "name": "East Route",
+            "color": "#6B92B5",
+            "stops": [
+                {
+                    "number": 1,
+                    "name": "Chestnut TFwy",
+                    "state": "MO",
+                    "notes": "Bottom of hill, N. of Cliff Dr"
+                },
+                {
+                    "number": 2,
+                    "name": "Quick Fuel",
+                    "location": "Front St/Cambridge",
+                    "state": "MO",
+                    "notes": "Behind Phillips 66"
+                },
+                {
+                    "number": 3,
+                    "name": "Train Bridge",
+                    "location": "Front St",
+                    "state": "MO",
+                    "notes": "East of Flying J"
+                },
+                {
+                    "number": 4,
+                    "name": "435/Independence",
+                    "notes": "Near Auto Parts Store to the west",
+                    "state": "MO"
+                },
+                {
+                    "number": 5,
+                    "name": "St John/Bennington",
+                    "state": "MO",
+                    "notes": "East of Super Flea"
+                }
+            ]
+        }
+    ]
+}

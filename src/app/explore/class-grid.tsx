@@ -43,15 +43,14 @@ export function ClassGrid({ series, hoveredSeriesIds, onSeriesHover }: ClassGrid
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-y-auto p-1">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-y-auto p-1 content-start">
       {series.map((s) => (
         <Card
           key={s.id}
-          className={`cursor-pointer transition-all duration-200 ${
-            hoveredSeriesIds.includes(s.id)
-              ? 'ring-2 ring-[#644874] shadow-lg'
-              : 'hover:shadow-md hover:border-[#644874]/40'
-          } ${series.length === 1 ? 'md:col-span-2 h-fit' : ''}`}
+          className={`cursor-pointer transition-all duration-200 ${hoveredSeriesIds.includes(s.id)
+            ? 'ring-2 ring-[#644874] shadow-lg'
+            : 'hover:shadow-md hover:border-[#644874]/40'
+            } ${series.length === 1 ? 'md:col-span-2 h-fit' : ''}`}
           onMouseEnter={() => onSeriesHover(s.id)}
           onMouseLeave={() => onSeriesHover(null)}
           onClick={() => {
@@ -116,16 +115,18 @@ export function ClassGrid({ series, hoveredSeriesIds, onSeriesHover }: ClassGrid
           </CardHeader>
 
           <CardContent className="pt-0">
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-3">
               {s.seriesDescription}
             </p>
 
-            {/* Click for details indicator */}
-            <div className={`flex items-center justify-end gap-1 mt-3 text-xs font-medium transition-opacity duration-200 ${
-              hoveredSeriesIds.includes(s.id) ? 'opacity-100' : 'opacity-0'
-            } text-[#644874] dark:text-[#9d7fb0]`}>
+            {/* View details at bottom */}
+            <div className={`flex items-center gap-1 mt-3 text-xs font-medium transition-all duration-200 ${hoveredSeriesIds.includes(s.id)
+              ? 'opacity-100 text-[#644874] dark:text-[#9d7fb0]'
+              : 'opacity-60 text-muted-foreground'
+              }`}>
               <span>View details</span>
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${hoveredSeriesIds.includes(s.id) ? 'translate-x-0.5' : ''
+                }`} />
             </div>
           </CardContent>
         </Card>

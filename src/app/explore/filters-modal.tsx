@@ -42,10 +42,14 @@ export function FiltersModal({
     if (localFilters.timeOfDay.length > 0) {
       const hour = parseInt(s.startTime.split(':')[0]);
       const timeMatches = localFilters.timeOfDay.some(time => {
-        if (time === 'morning' && hour >= 6 && hour < 12) return true;
-        if (time === 'midday' && hour >= 12 && hour < 15) return true;
-        if (time === 'afternoon' && hour >= 15 && hour < 18) return true;
-        if (time === 'evening' && hour >= 18) return true;
+        // Morning: 6am - 11am (6:00 - 10:59)
+        if (time === 'morning' && hour >= 6 && hour < 11) return true;
+        // Midday: 11am - 1pm (11:00 - 12:59)
+        if (time === 'midday' && hour >= 11 && hour < 13) return true;
+        // Afternoon: 1pm - 5pm (13:00 - 16:59)
+        if (time === 'afternoon' && hour >= 13 && hour < 17) return true;
+        // Evening: 5pm - 9pm (17:00 - 20:59)
+        if (time === 'evening' && hour >= 17 && hour < 21) return true;
         return false;
       });
       if (!timeMatches) return false;
@@ -69,8 +73,6 @@ export function FiltersModal({
       // Reset filters to show all classes when closing without applying
       const resetFilters: Filters = {
         timeOfDay: [],
-        classType: [],
-        level: "alllevels",
         matsProvided: null,
       };
       onFiltersChange(resetFilters);
@@ -81,8 +83,6 @@ export function FiltersModal({
   const handleReset = () => {
     const resetFilters: Filters = {
       timeOfDay: [],
-      classType: [],
-      level: "alllevels",
       matsProvided: null,
     };
     setLocalFilters(resetFilters);
@@ -93,17 +93,6 @@ export function FiltersModal({
       ? localFilters.timeOfDay.filter(t => t !== time)
       : [...localFilters.timeOfDay, time];
     setLocalFilters({ ...localFilters, timeOfDay: newTimeOfDay });
-  };
-
-  const toggleClassType = (type: string) => {
-    const newClassType = localFilters.classType.includes(type)
-      ? localFilters.classType.filter(t => t !== type)
-      : [...localFilters.classType, type];
-    setLocalFilters({ ...localFilters, classType: newClassType });
-  };
-
-  const setLevel = (level: string) => {
-    setLocalFilters({ ...localFilters, level });
   };
 
   const setMatsProvided = (value: boolean | null) => {
@@ -133,7 +122,7 @@ export function FiltersModal({
                   : "hover:bg-gray-100 dark:hover:bg-gray-800"
                 }
               >
-                Morning (6 AM - 12 PM)
+                Morning (6 - 11 AM)
               </Button>
               <Button
                 variant="outline"
@@ -144,7 +133,7 @@ export function FiltersModal({
                   : "hover:bg-gray-100 dark:hover:bg-gray-800"
                 }
               >
-                Midday (12 PM - 3 PM)
+                Midday (11 AM - 1 PM)
               </Button>
               <Button
                 variant="outline"
@@ -155,7 +144,7 @@ export function FiltersModal({
                   : "hover:bg-gray-100 dark:hover:bg-gray-800"
                 }
               >
-                Afternoon (3 PM - 6 PM)
+                Afternoon (1 - 5 PM)
               </Button>
               <Button
                 variant="outline"
@@ -166,102 +155,7 @@ export function FiltersModal({
                   : "hover:bg-gray-100 dark:hover:bg-gray-800"
                 }
               >
-                Evening (6 PM onwards)
-              </Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Class Type */}
-          <div>
-            <h3 className="text-base font-semibold mb-3">Class Type</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleClassType('flow')}
-                className={localFilters.classType.includes('flow')
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                Flow
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleClassType('restorative')}
-                className={localFilters.classType.includes('restorative')
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                Restorative
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleClassType('gentle')}
-                className={localFilters.classType.includes('gentle')
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                Gentle
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleClassType('sculpt')}
-                className={localFilters.classType.includes('sculpt')
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                Sculpt
-              </Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Level */}
-          <div>
-            <h3 className="text-base font-semibold mb-3">Level</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLevel('beginner')}
-                className={localFilters.level === 'beginner'
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                Beginner
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLevel('intermediate')}
-                className={localFilters.level === 'intermediate'
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                Intermediate/Advanced
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLevel('alllevels')}
-                className={localFilters.level === 'alllevels'
-                  ? "bg-[#644874] text-white border-[#644874]"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-              >
-                All Levels
+                Evening (5 - 9 PM)
               </Button>
             </div>
           </div>
